@@ -23,14 +23,17 @@ export interface RawCandle {
 }
 
 async function fetchOne(yahooSymbol: string, interval: string, range: string): Promise<RawCandle[]> {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
+  const host = Math.random() < 0.5 ? "query1" : "query2";
+  const url = `https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
     yahooSymbol,
   )}?interval=${interval}&range=${range}&includePrePost=false`;
 
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/122 Safari/537.36",
-      Accept: "application/json",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36",
+      Accept: "application/json,text/plain,*/*",
+      "Accept-Language": "en-US,en;q=0.9",
     },
   });
   if (!res.ok) throw new Error(`Yahoo ${yahooSymbol} -> ${res.status}`);
@@ -58,19 +61,65 @@ async function fetchOne(yahooSymbol: string, interval: string, range: string): P
   return out;
 }
 
+/** Fuente alternativa para cripto (Binance, sin clave) */
+const BINANCE_INTERVAL: Record<string, string> = { "5m": "5m", "15m": "15m", "1h": "1h", "1d": "1d" };
+const BINANCE_PAIRS: Record<string, string> = {
+  "BTC-USD": "BTCUSDT",
+  "ETH-USD": "ETHUSDT",
+  "SOL-USD": "SOLUSDT",
+};
+
+async function fetchBinance(yahooSymbol: string, interval: string): Promise<RawCandle[]> {
+  const pair = BINANCE_PAIRS[yahooSymbol];
+  if (!pair) throw new Error("Sin fuente alternativa");
+  const res = await fetch(
+    `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${BINANCE_INTERVAL[interval] ?? "15m"}&limit=500`,
+  );
+  if (!res.ok) throw new Error(`Binance ${pair} -> ${res.status}`);
+  const rows = (await res.json()) as unknown[][];
+  return rows.map((r) => ({
+    t: Number(r[0]),
+    o: Number(r[1]),
+    h: Number(r[2]),
+    l: Number(r[3]),
+    c: Number(r[4]),
+    v: Number(r[5]),
+  }));
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export const fetchMarketData = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => candlesInput.parse(data))
   .handler(async ({ data }) => {
     const cfg = YAHOO_INTERVAL[data.interval];
-    const entries = await Promise.all(
-      data.symbols.map(async (yahooSymbol) => {
+    const entries: Array<readonly [string, { candles: RawCandle[]; error: string | null }]> = [];
+
+    // Secuencial con espaciado: las peticiones en paralelo disparan el 429 del proveedor.
+    for (const yahooSymbol of data.symbols) {
+      let candles: RawCandle[] = [];
+      let error: string | null = null;
+      for (let attempt = 0; attempt < 2 && !candles.length; attempt++) {
         try {
-          const candles = await fetchOne(yahooSymbol, cfg.interval, cfg.range);
-          return [yahooSymbol, { candles, error: null as string | null }] as const;
+          candles = await fetchOne(yahooSymbol, cfg.interval, cfg.range);
+          error = null;
         } catch (e) {
-          return [yahooSymbol, { candles: [] as RawCandle[], error: (e as Error).message }] as const;
+          error = (e as Error).message;
+          await sleep(400);
         }
-      }),
-    );
+      }
+      if (!candles.length && BINANCE_PAIRS[yahooSymbol]) {
+        try {
+          candles = await fetchBinance(yahooSymbol, data.interval);
+          error = null;
+        } catch (e) {
+          error = (e as Error).message;
+        }
+      }
+      entries.push([yahooSymbol, { candles, error }] as const);
+      await sleep(150);
+    }
+
     return { fetchedAt: Date.now(), data: Object.fromEntries(entries) };
   });
+
