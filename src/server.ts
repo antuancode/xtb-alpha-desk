@@ -11,7 +11,6 @@ type ServerEntry = {
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 // Sin secretos obligatorios no se arranca (en producción el proceso muere).
-const { assertServerConfig, isConfigured } = await import("./server/config.server");
 assertServerConfig();
 
 // Arranca el motor de trading en cuanto el proceso levanta: el bot debe seguir
