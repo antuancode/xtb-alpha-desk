@@ -6,7 +6,12 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// Para el despliegue en Raspberry Pi se construye con NITRO_PRESET=node-server
+// (ver Dockerfile). Sin la variable se mantiene el comportamiento por defecto.
+const preset = process.env["NITRO_PRESET"];
+
 export default defineConfig({
+  ...(preset ? { nitro: { preset } } : {}),
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

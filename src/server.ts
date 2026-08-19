@@ -9,6 +9,12 @@ type ServerEntry = {
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
+// Arranca el motor de trading en cuanto el proceso levanta: el bot debe seguir
+// operando aunque no haya ningún navegador conectado.
+void import("./server/engine")
+  .then((m) => m.getEngine())
+  .catch((error) => console.error("No se pudo arrancar el motor de trading:", error));
+
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
     serverEntryPromise = import("@tanstack/react-start/server-entry").then(

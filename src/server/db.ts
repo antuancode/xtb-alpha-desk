@@ -137,7 +137,10 @@ class SqliteStore implements Store {
   acquireLock(engineId: string, pid: number, staleMs: number): boolean {
     const now = Date.now();
     const current = this.lockInfo();
-    if (current && current.engineId !== engineId && now - current.heartbeat < staleMs) return false;
+    // Un motor del mismo proceso (recarga en caliente / reinicio) recupera el mando;
+    // otro proceso solo puede tomarlo si el latido está caducado.
+    const foreign = current && current.engineId !== engineId && current.pid !== pid;
+    if (foreign && now - current.heartbeat < staleMs) return false;
     this.db
       .prepare(
         `INSERT INTO engine_lock (id, engine_id, pid, heartbeat) VALUES (1, ?, ?, ?)
@@ -199,7 +202,8 @@ let storePromise: Promise<Store> | undefined;
 
 export function getStore(): Promise<Store> {
   if (!storePromise) {
-    const file = process.env["ALPHADESK_DB"] ?? "/data/alphadesk.db";
+    const dir = process.env["ALPHADESK_DATA_DIR"] ?? "/data";
+    const file = process.env["ALPHADESK_DB"] ?? `${dir.replace(/\/$/, "")}/alphadesk.db`;
     storePromise = (async () => {
       ensureDir(file);
       const db = await openSqlite(file);

@@ -6,7 +6,13 @@ import { cn } from "@/lib/utils";
 import type { TradingBot } from "@/hooks/useTradingBot";
 
 export function DeskHeader({ bot }: { bot: TradingBot }) {
-  const { config, running, scanning, lastScan, toggleRunning, scan, profile } = bot;
+  const { config, running, scanning, lastScan, toggleRunning, scan, profile, connection, status } = bot;
+  const conn: Record<typeof connection, { text: string; cls: string }> = {
+    conectando: { text: "Conectando con el servidor…", cls: "text-muted-foreground" },
+    "en-vivo": { text: "Servidor en vivo", cls: "text-profit" },
+    sondeo: { text: "Servidor (sondeo)", cls: "text-accent" },
+    "sin-conexion": { text: "Servidor no disponible", cls: "text-loss" },
+  };
   const isReal = config.mode === "real";
 
   return (
@@ -44,8 +50,14 @@ export function DeskHeader({ bot }: { bot: TradingBot }) {
             </Badge>
           )}
 
+          <Badge variant="outline" className={cn("gap-1.5 border-border bg-surface-2 px-2.5 py-1 text-xs", conn[connection].cls)}>
+            <span className={cn("size-1.5 rounded-full bg-current", connection === "en-vivo" && "live-dot")} />
+            {conn[connection].text}
+          </Badge>
+
           <span className="num hidden text-xs text-muted-foreground sm:inline">
             {lastScan ? `Último escaneo ${fmtTime(lastScan)}` : "Esperando datos…"}
+            {status?.storage === "memory" && " · sin persistencia"}
           </span>
 
           <Button variant="outline" size="sm" onClick={() => void scan()} disabled={scanning}>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AlertTriangle, Link2, Link2Off, RefreshCw, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,14 @@ import { cn } from "@/lib/utils";
 import type { TradingBot } from "@/hooks/useTradingBot";
 
 export function XtbPanel({ bot }: { bot: TradingBot }) {
-  const { creds, saveCreds, xtb, connectXtb, disconnectXtb, refreshXtb, closeXtbPosition, config, updateConfig, liveArmed, setLiveArmed } =
+  const { xtb, refreshXtb, closeXtbPosition, config, updateConfig, liveArmed, setLiveArmed, saveCredentials, clearCredentials } =
     bot;
+  const [form, setForm] = useState<{ userId: string; password: string; account: "real" | "demo" }>({
+    userId: "",
+    password: "",
+    account: "real",
+  });
+  const envManaged = xtb.source === "env";
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,380px)_1fr]">
@@ -18,56 +25,79 @@ export function XtbPanel({ bot }: { bot: TradingBot }) {
         <div>
           <h3 className="text-sm font-semibold">Conexión con XTB</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Se usa la API de xStation5. Las credenciales solo viven en la sesión de este navegador y se envían
-            cifradas a XTB en cada operación; nunca se guardan en disco.
+            Las credenciales se guardan cifradas en el servidor (Raspberry Pi) para que el bot pueda operar 24/7 sin
+            ningún navegador abierto. También puedes definirlas con las variables de entorno XTB_USER_ID y
+            XTB_PASSWORD.
           </p>
         </div>
 
-        <div className="space-y-3">
-          <div>
-            <Label className="text-sm">Número de cuenta (ID)</Label>
-            <Input
-              className="num mt-2"
-              inputMode="numeric"
-              placeholder="12345678"
-              value={creds.userId}
-              onChange={(e) => saveCreds({ ...creds, userId: e.target.value.trim() })}
-            />
-          </div>
-          <div>
-            <Label className="text-sm">Contraseña</Label>
-            <Input
-              className="mt-2"
-              type="password"
-              placeholder="••••••••"
-              value={creds.password}
-              onChange={(e) => saveCreds({ ...creds, password: e.target.value })}
-            />
-          </div>
-          <div>
-            <Label className="text-sm">Servidor</Label>
-            <Select value={creds.account} onValueChange={(v) => saveCreds({ ...creds, account: v as "real" | "demo" })}>
-              <SelectTrigger className="mt-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="real">Cuenta real</SelectItem>
-                <SelectItem value="demo">Cuenta demo de XTB</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="rounded-md border border-border bg-surface-2 p-3 text-xs">
+          {xtb.configured ? (
+            <p>
+              Cuenta <span className="num font-semibold">{xtb.login}</span> ·{" "}
+              {xtb.account === "real" ? "servidor real" : "servidor demo"} ·{" "}
+              {envManaged ? "definida por entorno" : "guardada cifrada en el servidor"}
+            </p>
+          ) : (
+            <p className="text-muted-foreground">No hay credenciales guardadas en el servidor.</p>
+          )}
         </div>
 
+        {!envManaged && (
+          <div className="space-y-3">
+            <div>
+              <Label className="text-sm">Número de cuenta (ID)</Label>
+              <Input
+                className="num mt-2"
+                inputMode="numeric"
+                placeholder="12345678"
+                value={form.userId}
+                onChange={(e) => setForm({ ...form, userId: e.target.value.trim() })}
+              />
+            </div>
+            <div>
+              <Label className="text-sm">Contraseña</Label>
+              <Input
+                className="mt-2"
+                type="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label className="text-sm">Servidor</Label>
+              <Select value={form.account} onValueChange={(v) => setForm({ ...form, account: v as "real" | "demo" })}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="real">Cuenta real</SelectItem>
+                  <SelectItem value="demo">Cuenta demo de XTB</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2">
-          <Button className="flex-1" onClick={() => void connectXtb()}>
-            <Link2 className="size-4" /> Conectar
-          </Button>
-          <Button variant="outline" onClick={() => void refreshXtb()} disabled={!xtb.connected}>
+          {!envManaged && (
+            <Button
+              className="flex-1"
+              disabled={!form.userId || !form.password}
+              onClick={() => void saveCredentials(form).then(() => setForm({ ...form, password: "" }))}
+            >
+              <Link2 className="size-4" /> Guardar y conectar
+            </Button>
+          )}
+          <Button variant="outline" onClick={() => void refreshXtb()} disabled={!xtb.configured}>
             <RefreshCw className="size-4" />
           </Button>
-          <Button variant="outline" onClick={disconnectXtb} disabled={!xtb.connected}>
-            <Link2Off className="size-4" />
-          </Button>
+          {!envManaged && (
+            <Button variant="outline" onClick={() => void clearCredentials()} disabled={!xtb.configured}>
+              <Link2Off className="size-4" />
+            </Button>
+          )}
         </div>
 
         {xtb.error && (
@@ -100,12 +130,12 @@ export function XtbPanel({ bot }: { bot: TradingBot }) {
             <div className="space-y-3 rounded-md border border-loss/40 bg-loss/8 p-3">
               <p className="flex items-start gap-2 text-xs text-foreground">
                 <ShieldAlert className="mt-0.5 size-4 shrink-0 text-loss" />
-                El bot enviará órdenes con dinero real. Debes armar la ejecución explícitamente; se desarma al
-                desconectar o recargar la página.
+                El bot enviará órdenes con dinero real. El armado se guarda en el servidor y sigue activo aunque
+                cierres el navegador: desármalo aquí cuando quieras pararlo.
               </p>
               <div className="flex items-center justify-between gap-4">
                 <Label className="text-sm">Armar ejecución real</Label>
-                <Switch checked={liveArmed} disabled={!xtb.connected} onCheckedChange={setLiveArmed} />
+                <Switch checked={liveArmed} disabled={!xtb.configured} onCheckedChange={setLiveArmed} />
               </div>
             </div>
           )}

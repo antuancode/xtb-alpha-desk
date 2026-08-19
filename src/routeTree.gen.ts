@@ -11,6 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiBotStreamRouteImport } from './routes/api/bot/stream'
+import { Route as ApiBotSnapshotRouteImport } from './routes/api/bot/snapshot'
+import { Route as ApiBotCredentialsRouteImport } from './routes/api/bot/credentials'
+import { Route as ApiBotCommandRouteImport } from './routes/api/bot/command'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -22,31 +26,86 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBotStreamRoute = ApiBotStreamRouteImport.update({
+  id: '/api/bot/stream',
+  path: '/api/bot/stream',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBotSnapshotRoute = ApiBotSnapshotRouteImport.update({
+  id: '/api/bot/snapshot',
+  path: '/api/bot/snapshot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBotCredentialsRoute = ApiBotCredentialsRouteImport.update({
+  id: '/api/bot/credentials',
+  path: '/api/bot/credentials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBotCommandRoute = ApiBotCommandRouteImport.update({
+  id: '/api/bot/command',
+  path: '/api/bot/command',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/bot/command': typeof ApiBotCommandRoute
+  '/api/bot/credentials': typeof ApiBotCredentialsRoute
+  '/api/bot/snapshot': typeof ApiBotSnapshotRoute
+  '/api/bot/stream': typeof ApiBotStreamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/bot/command': typeof ApiBotCommandRoute
+  '/api/bot/credentials': typeof ApiBotCredentialsRoute
+  '/api/bot/snapshot': typeof ApiBotSnapshotRoute
+  '/api/bot/stream': typeof ApiBotStreamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/bot/command': typeof ApiBotCommandRoute
+  '/api/bot/credentials': typeof ApiBotCredentialsRoute
+  '/api/bot/snapshot': typeof ApiBotSnapshotRoute
+  '/api/bot/stream': typeof ApiBotStreamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sitemap.xml'
+  fullPaths:
+    | '/'
+    | '/sitemap.xml'
+    | '/api/bot/command'
+    | '/api/bot/credentials'
+    | '/api/bot/snapshot'
+    | '/api/bot/stream'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sitemap.xml'
-  id: '__root__' | '/' | '/sitemap.xml'
+  to:
+    | '/'
+    | '/sitemap.xml'
+    | '/api/bot/command'
+    | '/api/bot/credentials'
+    | '/api/bot/snapshot'
+    | '/api/bot/stream'
+  id:
+    | '__root__'
+    | '/'
+    | '/sitemap.xml'
+    | '/api/bot/command'
+    | '/api/bot/credentials'
+    | '/api/bot/snapshot'
+    | '/api/bot/stream'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiBotCommandRoute: typeof ApiBotCommandRoute
+  ApiBotCredentialsRoute: typeof ApiBotCredentialsRoute
+  ApiBotSnapshotRoute: typeof ApiBotSnapshotRoute
+  ApiBotStreamRoute: typeof ApiBotStreamRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +124,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bot/stream': {
+      id: '/api/bot/stream'
+      path: '/api/bot/stream'
+      fullPath: '/api/bot/stream'
+      preLoaderRoute: typeof ApiBotStreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bot/snapshot': {
+      id: '/api/bot/snapshot'
+      path: '/api/bot/snapshot'
+      fullPath: '/api/bot/snapshot'
+      preLoaderRoute: typeof ApiBotSnapshotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bot/credentials': {
+      id: '/api/bot/credentials'
+      path: '/api/bot/credentials'
+      fullPath: '/api/bot/credentials'
+      preLoaderRoute: typeof ApiBotCredentialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bot/command': {
+      id: '/api/bot/command'
+      path: '/api/bot/command'
+      fullPath: '/api/bot/command'
+      preLoaderRoute: typeof ApiBotCommandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiBotCommandRoute: ApiBotCommandRoute,
+  ApiBotCredentialsRoute: ApiBotCredentialsRoute,
+  ApiBotSnapshotRoute: ApiBotSnapshotRoute,
+  ApiBotStreamRoute: ApiBotStreamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
