@@ -9,6 +9,7 @@ import { HistoryTable, PositionsTable } from "@/components/desk/Tables";
 import { ActivityLog, NewsFeed } from "@/components/desk/Feeds";
 import { ConfigPanel } from "@/components/desk/ConfigPanel";
 import { XtbPanel } from "@/components/desk/XtbPanel";
+import { LoginScreen } from "@/components/desk/LoginScreen";
 import { useTradingBot } from "@/hooks/useTradingBot";
 import { fmtMoney, fmtPct, fmtSigned } from "@/lib/format";
 
@@ -37,6 +38,14 @@ export const Route = createFileRoute("/")({
 function Desk() {
   const bot = useTradingBot();
   const { config, account, stats, analyses, logs, news, profile } = bot;
+
+  if (!bot.authChecked) {
+    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Cargando…</div>;
+  }
+
+  if (!bot.authenticated) {
+    return <LoginScreen onLogin={bot.login} missingConfig={bot.missingConfig} />;
+  }
 
   const isSim = config.mode === "simulacion";
   const equity = isSim ? account.equity : bot.xtb.equity;
