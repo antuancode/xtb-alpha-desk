@@ -103,13 +103,8 @@ export function useTradingBot() {
   }, []);
 
   const config = snapshot?.config ?? DEFAULT_CONFIG;
-  const account = snapshot?.account ?? {
-    balance: DEFAULT_CONFIG.startingBalance,
-    equity: DEFAULT_CONFIG.startingBalance,
-    positions: [],
-    history: [],
-    equityCurve: [],
-  };
+  const fallbackAccount = useMemo(() => createAccount(DEFAULT_CONFIG.startingBalance), []);
+  const account = snapshot?.account ?? fallbackAccount;
   const stats = useMemo(() => computeStats(account, config.startingBalance), [account, config.startingBalance]);
   const profile = useMemo(() => riskProfile(config.aggressiveness), [config.aggressiveness]);
 
