@@ -130,12 +130,12 @@ export function XtbPanel({ bot }: { bot: TradingBot }) {
             <div className="space-y-3 rounded-md border border-loss/40 bg-loss/8 p-3">
               <p className="flex items-start gap-2 text-xs text-foreground">
                 <ShieldAlert className="mt-0.5 size-4 shrink-0 text-loss" />
-                El bot enviará órdenes con dinero real. Debes armar la ejecución explícitamente; se desarma al
-                desconectar o recargar la página.
+                El bot enviará órdenes con dinero real. El armado se guarda en el servidor y sigue activo aunque
+                cierres el navegador: desármalo aquí cuando quieras pararlo.
               </p>
               <div className="flex items-center justify-between gap-4">
                 <Label className="text-sm">Armar ejecución real</Label>
-                <Switch checked={liveArmed} disabled={!xtb.connected} onCheckedChange={setLiveArmed} />
+                <Switch checked={liveArmed} disabled={!xtb.configured} onCheckedChange={setLiveArmed} />
               </div>
             </div>
           )}
