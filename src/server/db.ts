@@ -137,7 +137,10 @@ class SqliteStore implements Store {
   acquireLock(engineId: string, pid: number, staleMs: number): boolean {
     const now = Date.now();
     const current = this.lockInfo();
-    if (current && current.engineId !== engineId && now - current.heartbeat < staleMs) return false;
+    // Un motor del mismo proceso (recarga en caliente / reinicio) recupera el mando;
+    // otro proceso solo puede tomarlo si el latido está caducado.
+    const foreign = current && current.engineId !== engineId && current.pid !== pid;
+    if (foreign && now - current.heartbeat < staleMs) return false;
     this.db
       .prepare(
         `INSERT INTO engine_lock (id, engine_id, pid, heartbeat) VALUES (1, ?, ?, ?)
