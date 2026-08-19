@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiBotStreamRouteImport } from './routes/api/bot/stream'
 import { Route as ApiBotSnapshotRouteImport } from './routes/api/bot/snapshot'
+import { Route as ApiBotSessionRouteImport } from './routes/api/bot/session'
 import { Route as ApiBotCredentialsRouteImport } from './routes/api/bot/credentials'
 import { Route as ApiBotCommandRouteImport } from './routes/api/bot/command'
 
@@ -36,6 +37,11 @@ const ApiBotSnapshotRoute = ApiBotSnapshotRouteImport.update({
   path: '/api/bot/snapshot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBotSessionRoute = ApiBotSessionRouteImport.update({
+  id: '/api/bot/session',
+  path: '/api/bot/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiBotCredentialsRoute = ApiBotCredentialsRouteImport.update({
   id: '/api/bot/credentials',
   path: '/api/bot/credentials',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/bot/command': typeof ApiBotCommandRoute
   '/api/bot/credentials': typeof ApiBotCredentialsRoute
+  '/api/bot/session': typeof ApiBotSessionRoute
   '/api/bot/snapshot': typeof ApiBotSnapshotRoute
   '/api/bot/stream': typeof ApiBotStreamRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/bot/command': typeof ApiBotCommandRoute
   '/api/bot/credentials': typeof ApiBotCredentialsRoute
+  '/api/bot/session': typeof ApiBotSessionRoute
   '/api/bot/snapshot': typeof ApiBotSnapshotRoute
   '/api/bot/stream': typeof ApiBotStreamRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/bot/command': typeof ApiBotCommandRoute
   '/api/bot/credentials': typeof ApiBotCredentialsRoute
+  '/api/bot/session': typeof ApiBotSessionRoute
   '/api/bot/snapshot': typeof ApiBotSnapshotRoute
   '/api/bot/stream': typeof ApiBotStreamRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/bot/command'
     | '/api/bot/credentials'
+    | '/api/bot/session'
     | '/api/bot/snapshot'
     | '/api/bot/stream'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/bot/command'
     | '/api/bot/credentials'
+    | '/api/bot/session'
     | '/api/bot/snapshot'
     | '/api/bot/stream'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/bot/command'
     | '/api/bot/credentials'
+    | '/api/bot/session'
     | '/api/bot/snapshot'
     | '/api/bot/stream'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiBotCommandRoute: typeof ApiBotCommandRoute
   ApiBotCredentialsRoute: typeof ApiBotCredentialsRoute
+  ApiBotSessionRoute: typeof ApiBotSessionRoute
   ApiBotSnapshotRoute: typeof ApiBotSnapshotRoute
   ApiBotStreamRoute: typeof ApiBotStreamRoute
 }
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBotSnapshotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bot/session': {
+      id: '/api/bot/session'
+      path: '/api/bot/session'
+      fullPath: '/api/bot/session'
+      preLoaderRoute: typeof ApiBotSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/bot/credentials': {
       id: '/api/bot/credentials'
       path: '/api/bot/credentials'
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiBotCommandRoute: ApiBotCommandRoute,
   ApiBotCredentialsRoute: ApiBotCredentialsRoute,
+  ApiBotSessionRoute: ApiBotSessionRoute,
   ApiBotSnapshotRoute: ApiBotSnapshotRoute,
   ApiBotStreamRoute: ApiBotStreamRoute,
 }
