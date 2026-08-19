@@ -5,6 +5,9 @@ export const Route = createFileRoute("/api/bot/stream")({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        const { guard } = await import("@/server/auth");
+        const denied = await guard(request);
+        if (denied) return denied;
         const { getEngine } = await import("@/server/engine");
         const { subscribe } = await import("@/server/bus");
         const engine = await getEngine();

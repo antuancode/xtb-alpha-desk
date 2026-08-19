@@ -11,6 +11,9 @@ export const Route = createFileRoute("/api/bot/credentials")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const { guard } = await import("@/server/auth");
+        const denied = await guard(request);
+        if (denied) return denied;
         const parsed = schema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return Response.json({ error: "Credenciales no válidas" }, { status: 400 });
 
@@ -28,7 +31,10 @@ export const Route = createFileRoute("/api/bot/credentials")({
         await engine.refreshXtbView();
         return Response.json(await engine.snapshot());
       },
-      DELETE: async () => {
+      DELETE: async ({ request }) => {
+        const { guard } = await import("@/server/auth");
+        const denied = await guard(request);
+        if (denied) return denied;
         const { deleteCredentials, getCredentials } = await import("@/server/state");
         const { source } = await getCredentials();
         if (source === "env") {

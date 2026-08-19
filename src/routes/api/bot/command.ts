@@ -23,6 +23,9 @@ export const Route = createFileRoute("/api/bot/command")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const { guard } = await import("@/server/auth");
+        const denied = await guard(request);
+        if (denied) return denied;
         const parsed = bodySchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) {
           return Response.json({ error: "Comando no válido" }, { status: 400 });
