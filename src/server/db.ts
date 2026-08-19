@@ -199,7 +199,8 @@ let storePromise: Promise<Store> | undefined;
 
 export function getStore(): Promise<Store> {
   if (!storePromise) {
-    const file = process.env["ALPHADESK_DB"] ?? "/data/alphadesk.db";
+    const dir = process.env["ALPHADESK_DATA_DIR"] ?? "/data";
+    const file = process.env["ALPHADESK_DB"] ?? `${dir.replace(/\/$/, "")}/alphadesk.db`;
     storePromise = (async () => {
       ensureDir(file);
       const db = await openSqlite(file);
