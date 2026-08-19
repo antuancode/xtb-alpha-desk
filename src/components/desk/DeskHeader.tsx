@@ -50,8 +50,14 @@ export function DeskHeader({ bot }: { bot: TradingBot }) {
             </Badge>
           )}
 
+          <Badge variant="outline" className={cn("gap-1.5 border-border bg-surface-2 px-2.5 py-1 text-xs", conn[connection].cls)}>
+            <span className={cn("size-1.5 rounded-full bg-current", connection === "en-vivo" && "live-dot")} />
+            {conn[connection].text}
+          </Badge>
+
           <span className="num hidden text-xs text-muted-foreground sm:inline">
             {lastScan ? `Último escaneo ${fmtTime(lastScan)}` : "Esperando datos…"}
+            {status?.storage === "memory" && " · sin persistencia"}
           </span>
 
           <Button variant="outline" size="sm" onClick={() => void scan()} disabled={scanning}>
