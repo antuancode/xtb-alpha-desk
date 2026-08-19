@@ -98,6 +98,8 @@ class TradingEngine {
   }
 
   private schedule(delayMs: number) {
+    // Solo el proceso con el mando ejecuta el bucle: evita bots duplicados.
+    if (!this.isLeader) return;
     if (this.timer) clearTimeout(this.timer);
     this.nextScanAt = Date.now() + delayMs;
     this.timer = setTimeout(() => {
