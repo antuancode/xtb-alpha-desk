@@ -9,11 +9,17 @@ type ServerEntry = {
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
+// Sin secretos obligatorios no se arranca (en producción el proceso muere).
+const { assertServerConfig, isConfigured } = await import("./server/config.server");
+assertServerConfig();
+
 // Arranca el motor de trading en cuanto el proceso levanta: el bot debe seguir
 // operando aunque no haya ningún navegador conectado.
-void import("./server/engine")
-  .then((m) => m.getEngine())
-  .catch((error) => console.error("No se pudo arrancar el motor de trading:", error));
+if (isConfigured()) {
+  void import("./server/engine")
+    .then((m) => m.getEngine())
+    .catch((error) => console.error("No se pudo arrancar el motor de trading:", error));
+}
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
