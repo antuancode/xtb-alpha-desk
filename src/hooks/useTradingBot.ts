@@ -87,6 +87,7 @@ export function useTradingBot() {
 
   // Flujo en tiempo real desde el servidor, con sondeo de respaldo.
   useEffect(() => {
+    if (!auth.authenticated) return;
     let poll: ReturnType<typeof setInterval> | null = null;
     let source: EventSource | null = null;
 
