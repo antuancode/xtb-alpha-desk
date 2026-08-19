@@ -6,7 +6,13 @@ import { cn } from "@/lib/utils";
 import type { TradingBot } from "@/hooks/useTradingBot";
 
 export function DeskHeader({ bot }: { bot: TradingBot }) {
-  const { config, running, scanning, lastScan, toggleRunning, scan, profile } = bot;
+  const { config, running, scanning, lastScan, toggleRunning, scan, profile, connection, status } = bot;
+  const conn: Record<typeof connection, { text: string; cls: string }> = {
+    conectando: { text: "Conectando con el servidor…", cls: "text-muted-foreground" },
+    "en-vivo": { text: "Servidor en vivo", cls: "text-profit" },
+    sondeo: { text: "Servidor (sondeo)", cls: "text-accent" },
+    "sin-conexion": { text: "Servidor no disponible", cls: "text-loss" },
+  };
   const isReal = config.mode === "real";
 
   return (
