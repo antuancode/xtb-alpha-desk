@@ -27,3 +27,38 @@ npm run dev
 - TypeScript
 - React
 - Tailwind CSS
+
+## Despliegue 24/7 en una Raspberry Pi (Docker)
+
+El bot ya no vive en el navegador: el motor de análisis y ejecución corre en el
+servidor y guarda su estado en SQLite, así que sigue operando con todos los
+navegadores cerrados y se recupera solo tras un reinicio.
+
+```bash
+git clone <tu-repo> alphadesk && cd alphadesk
+cp .env.example .env        # define ALPHADESK_SECRET (y, si quieres, las credenciales de XTB)
+docker compose up -d --build
+```
+
+- Panel: `http://<ip-de-la-raspberry>:3000`
+- Datos persistentes: volumen `alphadesk-data` montado en `/data` (`alphadesk.db`).
+- `restart: unless-stopped` hace que Docker levante el contenedor al arrancar la Pi.
+- Ver registros: `docker compose logs -f alphadesk`.
+
+### Variables de entorno
+
+| Variable | Descripción |
+| --- | --- |
+| `ALPHADESK_SECRET` | Clave para cifrar las credenciales de XTB en la base de datos. |
+| `XTB_USER_ID` / `XTB_PASSWORD` / `XTB_ACCOUNT` | Credenciales opcionales; tienen prioridad sobre las guardadas desde el panel. |
+| `ALPHADESK_DATA_DIR` | Carpeta de datos (por defecto `/data`). |
+| `PORT` | Puerto del servidor (3000). |
+
+### API del bot
+
+| Endpoint | Uso |
+| --- | --- |
+| `GET /api/bot/snapshot` | Estado completo (motor, configuración, cartera, análisis, registros). |
+| `GET /api/bot/stream` | Flujo SSE en tiempo real para los paneles. |
+| `POST /api/bot/command` | `start`, `stop`, `scan`, `arm`, `config`, `closeSim`, `resetSim`, `closeXtb`, `refreshXtb`. |
+| `POST/DELETE /api/bot/credentials` | Guardar o borrar las credenciales cifradas de XTB. |
