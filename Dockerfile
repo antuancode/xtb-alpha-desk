@@ -24,7 +24,7 @@ COPY --from=build /app/package.json ./package.json
 VOLUME ["/data"]
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:3000/api/bot/snapshot > /dev/null || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD bun -e "const p=process.env.PORT||3000; const r=await fetch('http://127.0.0.1:'+p+'/api/health'); if(!r.ok) process.exit(1); const j=await r.json(); if(j.status!=='ok') process.exit(1);" || exit 1
 
 CMD ["bun", "run", ".output/server/index.mjs"]
