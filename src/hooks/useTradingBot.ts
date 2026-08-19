@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { computeStats } from "@/lib/trading/engine";
+import { computeStats, createAccount } from "@/lib/trading/engine";
 import { riskProfile } from "@/lib/trading/strategy";
 import { DEFAULT_CONFIG } from "@/lib/trading/config";
 import type { BotConfig } from "@/lib/trading/types";
