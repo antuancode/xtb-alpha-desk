@@ -131,7 +131,7 @@ export function useTradingBot() {
       source?.close();
       if (poll) clearInterval(poll);
     };
-  }, [apply]);
+  }, [apply, auth.authenticated]);
 
   const run = useCallback(async (body: unknown) => {
     try {
