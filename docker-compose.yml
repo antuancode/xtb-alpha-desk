@@ -1,0 +1,22 @@
+services:
+  alphadesk:
+    build: .
+    container_name: alphadesk
+    # Se reinicia solo tras un corte de luz o un reinicio de la Raspberry Pi.
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      ALPHADESK_DATA_DIR: /data
+      # Clave de cifrado de las credenciales guardadas (cámbiala).
+      ALPHADESK_SECRET: ${ALPHADESK_SECRET:-cambia-esta-clave-por-una-larga-y-aleatoria}
+      # Opcional: credenciales de XTB por entorno (tienen prioridad sobre las del panel).
+      XTB_USER_ID: ${XTB_USER_ID:-}
+      XTB_PASSWORD: ${XTB_PASSWORD:-}
+      XTB_ACCOUNT: ${XTB_ACCOUNT:-real}
+    volumes:
+      - alphadesk-data:/data
+
+volumes:
+  alphadesk-data:
