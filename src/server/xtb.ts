@@ -42,7 +42,7 @@ export async function xtbFetchState(creds: XtbCredentials): Promise<XtbAccountSt
       equity: margin.equity,
       freeMargin: margin.margin_free,
       currency: margin.currency ?? user.currency,
-      login: user.login ?? Number(creds.userId) || null,
+      login: user.login ?? (Number(creds.userId) || null),
       positions: trades.map((t) => ({
         orderId: t.order2 ?? t.order,
         symbol: t.symbol,
