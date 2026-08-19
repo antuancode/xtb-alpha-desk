@@ -163,9 +163,17 @@ function Desk() {
           </TabsContent>
         </Tabs>
 
-        <footer className="border-t border-border pt-4 text-xs text-muted-foreground">
-          Los datos de mercado proceden de fuentes públicas y pueden tener retraso. Operar con apalancamiento conlleva
-          un riesgo elevado de pérdida de capital: esta herramienta no es asesoramiento financiero.
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs text-muted-foreground">
+          <p className="max-w-3xl">
+            Los datos de mercado proceden de fuentes públicas y pueden tener retraso. Operar con apalancamiento conlleva
+            un riesgo elevado de pérdida de capital: esta herramienta no es asesoramiento financiero.
+          </p>
+          <button
+            onClick={() => void bot.logout()}
+            className="rounded-md border border-border px-3 py-1.5 font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Cerrar sesión
+          </button>
         </footer>
       </main>
     </div>
