@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiBotStreamRouteImport } from './routes/api/bot/stream'
 import { Route as ApiBotSnapshotRouteImport } from './routes/api/bot/snapshot'
+import { Route as ApiBotCommandRouteImport } from './routes/api/bot/command'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -34,16 +35,23 @@ const ApiBotSnapshotRoute = ApiBotSnapshotRouteImport.update({
   path: '/api/bot/snapshot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBotCommandRoute = ApiBotCommandRouteImport.update({
+  id: '/api/bot/command',
+  path: '/api/bot/command',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/bot/command': typeof ApiBotCommandRoute
   '/api/bot/snapshot': typeof ApiBotSnapshotRoute
   '/api/bot/stream': typeof ApiBotStreamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/bot/command': typeof ApiBotCommandRoute
   '/api/bot/snapshot': typeof ApiBotSnapshotRoute
   '/api/bot/stream': typeof ApiBotStreamRoute
 }
@@ -51,18 +59,30 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/bot/command': typeof ApiBotCommandRoute
   '/api/bot/snapshot': typeof ApiBotSnapshotRoute
   '/api/bot/stream': typeof ApiBotStreamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sitemap.xml' | '/api/bot/snapshot' | '/api/bot/stream'
+  fullPaths:
+    | '/'
+    | '/sitemap.xml'
+    | '/api/bot/command'
+    | '/api/bot/snapshot'
+    | '/api/bot/stream'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sitemap.xml' | '/api/bot/snapshot' | '/api/bot/stream'
+  to:
+    | '/'
+    | '/sitemap.xml'
+    | '/api/bot/command'
+    | '/api/bot/snapshot'
+    | '/api/bot/stream'
   id:
     | '__root__'
     | '/'
     | '/sitemap.xml'
+    | '/api/bot/command'
     | '/api/bot/snapshot'
     | '/api/bot/stream'
   fileRoutesById: FileRoutesById
@@ -70,6 +90,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiBotCommandRoute: typeof ApiBotCommandRoute
   ApiBotSnapshotRoute: typeof ApiBotSnapshotRoute
   ApiBotStreamRoute: typeof ApiBotStreamRoute
 }
@@ -104,12 +125,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBotSnapshotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bot/command': {
+      id: '/api/bot/command'
+      path: '/api/bot/command'
+      fullPath: '/api/bot/command'
+      preLoaderRoute: typeof ApiBotCommandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiBotCommandRoute: ApiBotCommandRoute,
   ApiBotSnapshotRoute: ApiBotSnapshotRoute,
   ApiBotStreamRoute: ApiBotStreamRoute,
 }
