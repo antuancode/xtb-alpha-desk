@@ -9,6 +9,7 @@ import { HistoryTable, PositionsTable } from "@/components/desk/Tables";
 import { ActivityLog, NewsFeed } from "@/components/desk/Feeds";
 import { ConfigPanel } from "@/components/desk/ConfigPanel";
 import { XtbPanel } from "@/components/desk/XtbPanel";
+import { LoginScreen } from "@/components/desk/LoginScreen";
 import { useTradingBot } from "@/hooks/useTradingBot";
 import { fmtMoney, fmtPct, fmtSigned } from "@/lib/format";
 
@@ -37,6 +38,14 @@ export const Route = createFileRoute("/")({
 function Desk() {
   const bot = useTradingBot();
   const { config, account, stats, analyses, logs, news, profile } = bot;
+
+  if (!bot.authChecked) {
+    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Cargando…</div>;
+  }
+
+  if (!bot.authenticated) {
+    return <LoginScreen onLogin={bot.login} missingConfig={bot.missingConfig} />;
+  }
 
   const isSim = config.mode === "simulacion";
   const equity = isSim ? account.equity : bot.xtb.equity;
@@ -154,9 +163,17 @@ function Desk() {
           </TabsContent>
         </Tabs>
 
-        <footer className="border-t border-border pt-4 text-xs text-muted-foreground">
-          Los datos de mercado proceden de fuentes públicas y pueden tener retraso. Operar con apalancamiento conlleva
-          un riesgo elevado de pérdida de capital: esta herramienta no es asesoramiento financiero.
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs text-muted-foreground">
+          <p className="max-w-3xl">
+            Los datos de mercado proceden de fuentes públicas y pueden tener retraso. Operar con apalancamiento conlleva
+            un riesgo elevado de pérdida de capital: esta herramienta no es asesoramiento financiero.
+          </p>
+          <button
+            onClick={() => void bot.logout()}
+            className="rounded-md border border-border px-3 py-1.5 font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Cerrar sesión
+          </button>
         </footer>
       </main>
     </div>

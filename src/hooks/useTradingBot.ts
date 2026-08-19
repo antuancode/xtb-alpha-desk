@@ -32,7 +32,47 @@ export function useTradingBot() {
   const [snapshot, setSnapshot] = useState<BotSnapshot | null>(null);
   const [connection, setConnection] = useState<"conectando" | "en-vivo" | "sondeo" | "sin-conexion">("conectando");
   const [actionError, setActionError] = useState<string | null>(null);
+  const [auth, setAuth] = useState<{ checked: boolean; authenticated: boolean; missing: string[] }>({
+    checked: false,
+    authenticated: false,
+    missing: [],
+  });
   const mounted = useRef(true);
+
+  const refreshSession = useCallback(async () => {
+    try {
+      const res = await fetch("/api/bot/session", { cache: "no-store" });
+      const json = (await res.json()) as { authenticated: boolean; missing?: string[] };
+      if (mounted.current) {
+        setAuth({ checked: true, authenticated: json.authenticated, missing: json.missing ?? [] });
+      }
+    } catch {
+      if (mounted.current) setAuth({ checked: true, authenticated: false, missing: [] });
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshSession();
+  }, [refreshSession]);
+
+  const login = useCallback(async (password: string) => {
+    const res = await fetch("/api/bot/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    const json = (await res.json()) as { error?: string };
+    if (!res.ok) throw new Error(json.error ?? "No se pudo iniciar sesión");
+    if (mounted.current) setAuth({ checked: true, authenticated: true, missing: [] });
+  }, []);
+
+  const logout = useCallback(async () => {
+    await fetch("/api/bot/session", { method: "DELETE" });
+    if (mounted.current) {
+      setSnapshot(null);
+      setAuth({ checked: true, authenticated: false, missing: [] });
+    }
+  }, []);
 
   useEffect(() => {
     mounted.current = true;
@@ -47,6 +87,7 @@ export function useTradingBot() {
 
   // Flujo en tiempo real desde el servidor, con sondeo de respaldo.
   useEffect(() => {
+    if (!auth.authenticated) return;
     let poll: ReturnType<typeof setInterval> | null = null;
     let source: EventSource | null = null;
 
@@ -90,7 +131,7 @@ export function useTradingBot() {
       source?.close();
       if (poll) clearInterval(poll);
     };
-  }, [apply]);
+  }, [apply, auth.authenticated]);
 
   const run = useCallback(async (body: unknown) => {
     try {
@@ -156,6 +197,11 @@ export function useTradingBot() {
     hydrated: snapshot !== null,
     connection,
     actionError,
+    authChecked: auth.checked,
+    authenticated: auth.authenticated,
+    missingConfig: auth.missing,
+    login,
+    logout,
     status: snapshot?.status ?? null,
     config,
     updateConfig,

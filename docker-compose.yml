@@ -9,8 +9,9 @@ services:
     environment:
       PORT: "3000"
       ALPHADESK_DATA_DIR: /data
-      # Clave de cifrado de las credenciales guardadas (cámbiala).
-      ALPHADESK_SECRET: ${ALPHADESK_SECRET:-cambia-esta-clave-por-una-larga-y-aleatoria}
+      # Obligatorias: sin ellas el contenedor no arranca (no hay valores por defecto).
+      ALPHADESK_SECRET: ${ALPHADESK_SECRET:?define ALPHADESK_SECRET en el archivo .env}
+      ALPHADESK_PASSWORD: ${ALPHADESK_PASSWORD:?define ALPHADESK_PASSWORD en el archivo .env}
       # Opcional: credenciales de XTB por entorno (tienen prioridad sobre las del panel).
       XTB_USER_ID: ${XTB_USER_ID:-}
       XTB_PASSWORD: ${XTB_PASSWORD:-}

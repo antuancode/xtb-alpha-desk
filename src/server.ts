@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { assertServerConfig, isConfigured } from "./server/config.server";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -9,11 +10,16 @@ type ServerEntry = {
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
+// Sin secretos obligatorios no se arranca (en producción el proceso muere).
+assertServerConfig();
+
 // Arranca el motor de trading en cuanto el proceso levanta: el bot debe seguir
 // operando aunque no haya ningún navegador conectado.
-void import("./server/engine")
-  .then((m) => m.getEngine())
-  .catch((error) => console.error("No se pudo arrancar el motor de trading:", error));
+if (isConfigured()) {
+  void import("./server/engine")
+    .then((m) => m.getEngine())
+    .catch((error) => console.error("No se pudo arrancar el motor de trading:", error));
+}
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {

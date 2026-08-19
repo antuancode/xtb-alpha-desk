@@ -1,11 +1,12 @@
 /** Cifrado AES-GCM para las credenciales guardadas en SQLite. Server-only. */
+import { requireSecret } from "./config.server";
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
 async function key(): Promise<CryptoKey> {
-  const secret = process.env["ALPHADESK_SECRET"] ?? "alphadesk-default-insecure-key";
-  const digest = await crypto.subtle.digest("SHA-256", enc.encode(secret));
+  // Sin clave por defecto: si falta el secreto, lanzamos.
+  const digest = await crypto.subtle.digest("SHA-256", enc.encode(requireSecret()));
   return crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["encrypt", "decrypt"]);
 }
 
